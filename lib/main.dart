@@ -12,6 +12,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final cameras = await availableCameras();
   final firstCamera = cameras.first;
+
   runApp(
       MaterialApp(
         theme: ThemeData.dark(),
@@ -37,6 +38,13 @@ class CameraFeedState extends State<CameraFeed>{
   CameraController _controller;
   Future<void> _initializeControllerFuture;
 
+  loadModel() async {
+    await Tflite.loadModel(
+      model: "assets/tflite/ssd_mobilenet.tflite",
+      labels: "assets/tflite/ssd_mobilenet.txt"
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +53,7 @@ class CameraFeedState extends State<CameraFeed>{
       ResolutionPreset.low,
     );
     _initializeControllerFuture = _controller.initialize();
+    loadModel();
   }
 
   @override
@@ -75,9 +84,20 @@ class CameraFeedState extends State<CameraFeed>{
     );
   }
 
-  void _onNewFrame(CameraImage image) {
-    print("foo");
-    _controller.stopImageStream();
+
+
+  void _onNewFrame(CameraImage img) async {
+    Tflite.detectObjectOnFrame(
+      bytesList: img.planes.map((plane) {
+        return plane.bytes;
+      }).toList(),
+      model: "SSDMobileNet",
+      imageHeight: img.height,
+      imageWidth: img.width,
+      numResultsPerClass: 1,
+    ).then((recognitions) {
+      print(recognitions);
+    });
   }
 
 
