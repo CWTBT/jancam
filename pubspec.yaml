@@ -24,6 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   camera: ^0.5.8+5
+  tflite: ^1.1.1
 
 
   # The following adds the Cupertino Icons font to your application.

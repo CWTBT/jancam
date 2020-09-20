@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:tflite/tflite.dart';
 
 
 
@@ -41,7 +42,7 @@ class CameraFeedState extends State<CameraFeed>{
     super.initState();
     _controller = CameraController(
       widget.camera,
-      ResolutionPreset.medium,
+      ResolutionPreset.low,
     );
     _initializeControllerFuture = _controller.initialize();
   }
@@ -56,20 +57,28 @@ class CameraFeedState extends State<CameraFeed>{
   Widget build(BuildContext context) {
     return Scaffold (
       appBar: AppBar(title: Text('JanCam')),
-      // The following ensures that the camera controller is fully initialized
-      // before we try to display the camera preview.
-      body: FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            // If the Future is complete, display the preview.
-            return CameraPreview(_controller);
-          } else {
-            // Otherwise, display a loading indicator.
-            return Center(child: CircularProgressIndicator());
-          }
-        },
-      )
+      body: _getCameraPreview()
     );
   }
+
+  Widget _getCameraPreview() {
+    return FutureBuilder<void>(
+      future: _initializeControllerFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          _controller.startImageStream((CameraImage image) => {_onNewFrame(image)});
+          return CameraPreview(_controller);
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
+    );
+  }
+
+  void _onNewFrame(CameraImage image) {
+    print("foo");
+    _controller.stopImageStream();
+  }
+
+
 }
