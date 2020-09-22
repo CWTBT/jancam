@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
@@ -37,6 +36,7 @@ class CameraFeed extends StatefulWidget {
 class CameraFeedState extends State<CameraFeed>{
   CameraController _controller;
   Future<void> _initializeControllerFuture;
+  bool isDetecting = false;
 
   loadModel() async {
     await Tflite.loadModel(
@@ -52,8 +52,20 @@ class CameraFeedState extends State<CameraFeed>{
       widget.camera,
       ResolutionPreset.low,
     );
-    _initializeControllerFuture = _controller.initialize();
+
     loadModel();
+    _initializeControllerFuture = _controller.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+
+      _controller.startImageStream((CameraImage img) {
+        if (!isDetecting) {
+          _detectObjects(img);
+        }
+      });
+    });
   }
 
   @override
@@ -75,7 +87,6 @@ class CameraFeedState extends State<CameraFeed>{
       future: _initializeControllerFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          _controller.startImageStream((CameraImage image) => {_onNewFrame(image)});
           return CameraPreview(_controller);
         } else {
           return Center(child: CircularProgressIndicator());
@@ -86,7 +97,8 @@ class CameraFeedState extends State<CameraFeed>{
 
 
 
-  void _onNewFrame(CameraImage img) async {
+  Future<void> _detectObjects(CameraImage img) async {
+    isDetecting = true;
     Tflite.detectObjectOnFrame(
       bytesList: img.planes.map((plane) {
         return plane.bytes;
@@ -96,7 +108,7 @@ class CameraFeedState extends State<CameraFeed>{
       imageWidth: img.width,
       numResultsPerClass: 1,
     ).then((recognitions) {
-      print(recognitions);
+      isDetecting = false;
     });
   }
 
