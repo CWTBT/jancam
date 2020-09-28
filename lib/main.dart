@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'CameraManager.dart';
+import 'RecognitionDisplay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,9 +11,7 @@ void main() async {
   runApp(
       MaterialApp(
         theme: ThemeData.dark(),
-        home: CameraManager(
-          camera: firstCamera,
-        ),
+        home: RecognitionDisplay(firstCamera),
       ),
   );
 }

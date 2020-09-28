@@ -59,10 +59,7 @@ class CameraManagerState extends State<CameraManager>{
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold (
-        appBar: AppBar(title: Text('JanCam')),
-        body: _getCameraPreview()
-    );
+    return _getCameraPreview();
   }
 
   Widget _getCameraPreview() {
@@ -93,6 +90,7 @@ class CameraManagerState extends State<CameraManager>{
 
     ).then((recognitions) {
       isDetecting = false;
+      _controller.stopImageStream();
     });
   }
 }
