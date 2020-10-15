@@ -16,3 +16,27 @@ class Tile {
     return suitDiff == 0 ? rank - other.rank : suitDiff;
   }
 }
+
+class Hand {
+  List<Tile> tiles;
+
+  Hand(this.tiles) {
+    tiles.sort((a,b) => a.compareTo(b));
+  }
+
+  String toString() {
+    String handAsString = "";
+    String currentSuit = tiles[0].suit;
+
+    for (Tile tile in tiles) {
+      if(tile.suit != currentSuit) {
+        handAsString = handAsString + currentSuit;
+        currentSuit = tile.suit;
+      }
+      handAsString = handAsString + tile.rank.toString();
+    }
+    handAsString = handAsString + currentSuit;
+
+    return handAsString;
+  }
+}
