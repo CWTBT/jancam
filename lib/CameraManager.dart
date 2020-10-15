@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:tflite/tflite.dart';
 
+// Callback for _setRecognitions in RecognitionDisplay
+typedef void Callback(List<dynamic> list, int h, int w);
+
 class CameraManager extends StatefulWidget {
   final CameraDescription camera;
-  const CameraManager({
-    Key key,
-    @required this.camera,
-  }) : super(key: key);
+  final Callback setRecognitions;
+
+  CameraManager(this.camera, this.setRecognitions);
 
   @override
   CameraManagerState createState() => CameraManagerState();
@@ -89,8 +91,8 @@ class CameraManagerState extends State<CameraManager>{
       numResultsPerClass: 1,
 
     ).then((recognitions) {
+      widget.setRecognitions(recognitions, img.height, img.width);
       isDetecting = false;
-      _controller.stopImageStream();
     });
   }
 }

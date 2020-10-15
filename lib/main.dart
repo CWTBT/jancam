@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'CameraManager.dart';
 import 'RecognitionDisplay.dart';
 
 void main() async {
