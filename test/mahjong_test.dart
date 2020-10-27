@@ -45,6 +45,6 @@ void main() {
 
     Hand myHand = new Hand(tileList);
     String asString = myHand.toString();
-    expect(asString, equals("11234p234s111z222m"));
+    expect(asString, equals("11234p234s111z|222m"));
   });
 }
