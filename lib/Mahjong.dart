@@ -62,3 +62,12 @@ class Hand {
     return handAsString;
   }
 }
+
+class Meld {
+  final List<Tile> meldedTiles;
+  bool isTriplet;
+
+  Meld(this.meldedTiles) {
+    meldedTiles[0].rank == meldedTiles[1].rank ? isTriplet = true : isTriplet = false;
+  }
+}
