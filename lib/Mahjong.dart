@@ -59,7 +59,11 @@ class RawTiles {
       if (tileString[i] == "|") isOpen = true;
       else if (int.tryParse(tileString[i]) == null) { //char is not numeric
         String suit = tileString[i];
-        for(int rank in currentTiles) tiles.add(new Tile(rank, suit, isOpen));
+        for(int rank in currentTiles) {
+          tiles.add(new Tile(rank, suit, isOpen));
+          if (!isOpen) closedPortion.add(new Tile(rank, suit, isOpen));
+        }
+
         currentTiles = [];
       }
       else currentTiles.add(int.parse(tileString[i]));

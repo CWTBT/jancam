@@ -10,48 +10,51 @@ class Scorer {
   Scorer(this.raw, this.winningTile);
 
   List<Hand> getValidHands() {
-    List<Tile> possiblePairTiles = getPossiblePairTiles();
+    List<String> possiblePairTiles = getPossiblePairTiles();
     possiblePairTiles.forEach((pairTile) {
       List<Tile> withoutPair = _removePairFromHand(pairTile);
       List<RawTiles> splitList = splitBySuit(withoutPair);
+      List<List<dynamic>> allValidMelds = [];
       for(RawTiles suitedTiles in splitList) {
         // This is guaranteed to be a List of List<Meld>
         // List<dynamic> is used to play nicely with trotter combinations
+        if (suitedTiles.tiles.length < 3) continue;
         List<List<dynamic>> validMelds = getValidCompositions(suitedTiles.closedPortion);
+        allValidMelds.addAll(validMelds);
       }
+      print(allValidMelds);
     });
   }
 
-  List<Tile> getPossiblePairTiles() {
-    Map<Tile,int> duplicates = _findDuplicateTiles();
-    List<Tile> possiblePairTiles = List();
+  List<String> getPossiblePairTiles() {
+    Map<String,int> duplicates = _findDuplicateTiles();
+    List<String> possiblePairTiles = new List();
     duplicates.forEach((key, value) {
-      if (value == 2) return [key];
-      else possiblePairTiles.add(key);
+      possiblePairTiles.add(key);
     });
     return possiblePairTiles;
   }
 
-  Map<Tile,int> _findDuplicateTiles() {
-    Map<Tile,int> tileCount = _countTiles(closedOnly: true);
+  Map<String,int> _findDuplicateTiles() {
+    Map<String,int> tileCount = _countTiles(closedOnly: true);
     tileCount.removeWhere((key, value) => tileCount[key] < 2);
     return tileCount;
   }
 
-  Map<Tile,int> _countTiles({closedOnly = false}) {
-    Map<Tile,int> tileCount;
+  Map<String,int> _countTiles({closedOnly = false}) {
+    Map<String,int> tileCount = new Map();
     List<Tile> tileSelection;
     closedOnly ? tileSelection = raw.closedPortion : tileSelection = raw.tiles;
     for (Tile tile in tileSelection) {
-      if(tileCount.containsKey(tile)) tileCount[tile] += 1;
-      else tileCount[tile] = 1;
+      if(tileCount.containsKey(tile.toString())) tileCount[tile.toString()] += 1;
+      else tileCount[tile.toString()] = 1;
     }
     return tileCount;
   }
 
-  List<Tile> _removePairFromHand(Tile pairTile) {
+  List<Tile> _removePairFromHand(String pairTile) {
     List<Tile> tempList = raw.tiles;
-    int i = tempList.indexOf(pairTile);
+    int i = tempList.indexWhere((tile) => tile.toString() == pairTile.toString());
     tempList.removeRange(i, i+1);
     return tempList;
   }

@@ -45,7 +45,7 @@ void main() {
     expect(splitListsResults, equals([manzu,pinzu,souzu,honors]));
   });
 
-  test("Finding valid compositions", () {
+  test("Finding valid compositions in one suit", () {
     RawTiles manzu = new RawTiles.fromString("222333444m");
     Scorer s = new Scorer(manzu, manzu.tiles[0]);
 
@@ -72,5 +72,11 @@ void main() {
     // Expected should now be a List of List<Melds> as follows:
     // [222m, 333m, 444m], [234m, 234m, 234m]
     expect(s.getValidCompositions(manzu.tiles).toString(), equals(expected.toString()));
+  });
+
+  test("Valid comps for entire hand", () {
+    RawTiles fullHand = new RawTiles.fromString("223344m11p234567s");
+    Scorer s = new Scorer(fullHand, fullHand.tiles[0]);
+    s.getValidHands();
   });
 }
