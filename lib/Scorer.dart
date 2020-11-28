@@ -11,19 +11,31 @@ class Scorer {
 
   List<Hand> getValidHands() {
     List<String> possiblePairTiles = getPossiblePairTiles();
+    List<Hand> validHands = [];
     possiblePairTiles.forEach((pairTile) {
+      Tile pt = Tile.fromString(pairTile);
+      Meld pair = new Meld([pt, pt]);
       List<Tile> withoutPair = _removePairFromHand(pairTile);
       List<RawTiles> splitList = splitBySuit(withoutPair);
       List<List<dynamic>> allValidMelds = [];
+
       for(RawTiles suitedTiles in splitList) {
-        // This is guaranteed to be a List of List<Meld>
-        // List<dynamic> is used to play nicely with trotter combinations
         if (suitedTiles.tiles.length < 3) continue;
+        String suit = suitedTiles.tiles[0].suit;
         List<List<dynamic>> validMelds = getValidCompositions(suitedTiles.closedPortion);
+        if (validMelds.length == 0) break;
         allValidMelds.addAll(validMelds);
       }
-      print(allValidMelds);
+      if(allValidMelds.length > 0) {
+        List<List<dynamic>> handCompositions = combineMelds(allValidMelds);
+        for (List<dynamic> comp in handCompositions) {
+          Hand h = new Hand(comp, pair, winningTile);
+          validHands.add(h);
+        }
+      }
     });
+    print(validHands);
+    return validHands;
   }
 
   List<String> getPossiblePairTiles() {
@@ -53,9 +65,9 @@ class Scorer {
   }
 
   List<Tile> _removePairFromHand(String pairTile) {
-    List<Tile> tempList = raw.tiles;
+    List<Tile> tempList = new List.from(raw.tiles);
     int i = tempList.indexWhere((tile) => tile.toString() == pairTile.toString());
-    tempList.removeRange(i, i+1);
+    tempList.removeRange(i, i+2);
     return tempList;
   }
 
@@ -91,30 +103,58 @@ class Scorer {
 
     List<List<dynamic>> validComp = [];
 
-    // Will always be some multiple of 3 if the hand is valid
+    // suitedTiles will always be some multiple of 3 if the hand is valid
+    // Since even closed quads must be declared, they will be considered "open"
+    // and thus this function doesn't have to worry about them.
     int neededMelds = (suitedTiles.length/ 3).toInt();
+    int neededTiles = neededMelds * 3;
 
-    // If our subset is only 3 tiles, there will only be one valid meld
-    if (neededMelds == 1) validComp.add(possibleMelds);
-
-    // Otherwise, we have to find what combinations of the possible melds
+    // we have to find what combinations of the possible melds
     // produce a valid composition.
-    else {
-      String target = rawSuited.toString();
-      Combinations all_meld_combos = Combinations(neededMelds, possibleMelds);
-      List usedComps = [];
-      for (var combo in all_meld_combos()) {
-        RawTiles tilesInSection = RawTiles.fromMelds(combo);
-        if (tilesInSection.toString() == target) {
-          if (!usedComps.contains(combo.toString())) {
-            validComp.add(combo);
-            usedComps.add(combo.toString());
-          }
+    String target = rawSuited.toString();
+    Combinations all_meld_combos = Combinations(neededMelds, possibleMelds);
+    List usedComps = [];
+    for (var combo in all_meld_combos()) {
+      RawTiles tilesInSection = RawTiles.fromMelds(combo);
+      if (tilesInSection.toString() == target && combo.length == neededMelds) {
+        if (!usedComps.contains(combo.toString())) {
+          validComp.add(combo);
+          usedComps.add(combo.toString());
         }
       }
     }
-
-    validComp.toSet().toList();
     return validComp;
+  }
+
+  List<List<dynamic>> combineMelds(List<List<dynamic>> allMelds) {
+    List<List<dynamic>> possibleHands = new List();
+
+    if (allMelds.length == 1) {
+      possibleHands.add(allMelds[0]);
+      return possibleHands;
+    }
+
+    String suit = allMelds[0][0].getSuit();
+    for (int j = 0; j < allMelds.length; j++) {
+      if (allMelds[j][0].getSuit() != suit) break;
+      List<dynamic> root = allMelds[j];
+      int meldCount = root.length;
+      List<dynamic> currentMelds = root;
+      for (int i = 1; i < allMelds.length; i++) {
+        //print("$root <-> ${allMelds[i]}");
+        int newCount = meldCount + allMelds[i].length;
+        if (newCount > 4) continue;
+        currentMelds.addAll(allMelds[i]);
+        if (newCount == 4) {
+          possibleHands.add(currentMelds);
+          currentMelds = root;
+          meldCount = root.length;
+        }
+        else {
+          meldCount = newCount;
+        }
+      }
+    }
+    return possibleHands;
   }
 }

@@ -1,16 +1,22 @@
 import 'meldType.dart';
 
 class Tile {
-  final int rank;
-  final String suit;
+  int rank;
+  String suit;
   bool isOpen;
 
   Tile(this.rank, this.suit, [isOpen = false]) {
     this.isOpen = isOpen;
   }
 
+  Tile.fromString(String s, [isOpen = false]) {
+    this.isOpen = isOpen;
+    this.rank = int.parse(s.substring(0, 1));
+    this.suit = s.substring(1);
+  }
+
   String toString() {
-    return "$suit$rank";
+    return "$rank$suit";
   }
 
   @override
@@ -97,10 +103,11 @@ class RawTiles {
 }
 
 class Hand {
-  final List<Meld> melds;
+  final List<dynamic> melds;
+  final Meld pair;
   final Tile winningTile;
 
-  Hand(this.melds, this.winningTile);
+  Hand(this.melds, this.pair, this.winningTile);
 
   List<Tile> toTiles() {
     List<Tile> tiles = [];
@@ -111,6 +118,8 @@ class Hand {
     }
     return tiles;
   }
+
+  String toString() => melds.toString() + " + "+ pair.toString();
 }
 
 class Meld {
@@ -125,6 +134,10 @@ class Meld {
     else if (meldedTiles[0].rank == meldedTiles[1].rank
         && meldedTiles[1].rank == meldedTiles[2].rank) type = meldType.TRIPLET;
     else type = meldType.INVALID;
+  }
+
+  String getSuit() {
+    return meldedTiles[0].suit;
   }
 
   String toString() {
