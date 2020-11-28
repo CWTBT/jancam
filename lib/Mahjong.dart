@@ -119,12 +119,21 @@ class Hand {
     return tiles;
   }
 
-  String toString() => melds.toString() + " + "+ pair.toString();
+  String toString() {
+    String s = "[";
+    bool opened = false;
+    for (Meld m in melds) {
+      if(m.isOpen && !opened) s = s.substring(0, s.length - 2) +  "|";
+      s += m.toString() +", ";
+    }
+    return s.substring(0, s.length-2) + "]";
+  }
 }
 
 class Meld {
   final List<dynamic> meldedTiles;
   meldType type;
+  bool isOpen;
 
   Meld(this.meldedTiles) {
     if (meldedTiles.length == 2) type = meldType.PAIR;
@@ -134,6 +143,8 @@ class Meld {
     else if (meldedTiles[0].rank == meldedTiles[1].rank
         && meldedTiles[1].rank == meldedTiles[2].rank) type = meldType.TRIPLET;
     else type = meldType.INVALID;
+
+    isOpen = meldedTiles[0].isOpen;
   }
 
   String getSuit() {

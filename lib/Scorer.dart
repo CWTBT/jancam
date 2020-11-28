@@ -12,6 +12,7 @@ class Scorer {
   List<Hand> getValidHands() {
     List<String> possiblePairTiles = getPossiblePairTiles();
     List<Hand> validHands = [];
+    List<dynamic> openMelds = _getOpenMelds();
     possiblePairTiles.forEach((pairTile) {
       Tile pt = Tile.fromString(pairTile);
       Meld pair = new Meld([pt, pt]);
@@ -29,6 +30,7 @@ class Scorer {
       if(allValidMelds.length > 0) {
         List<List<dynamic>> handCompositions = combineMelds(allValidMelds);
         for (List<dynamic> comp in handCompositions) {
+          comp.addAll(openMelds);
           Hand h = new Hand(comp, pair, winningTile);
           validHands.add(h);
         }
@@ -36,6 +38,19 @@ class Scorer {
     });
     print(validHands);
     return validHands;
+  }
+
+  List<dynamic> _getOpenMelds() {
+    List<Tile> currentTiles = [];
+    List<dynamic> melds = [];
+    for (Tile t in raw.tiles) {
+      if (t.isOpen) currentTiles.add(t);
+      if (currentTiles.length > 2) {
+        melds.add(new Meld(currentTiles));
+        currentTiles = [];
+      }
+    }
+    return melds;
   }
 
   List<String> getPossiblePairTiles() {
@@ -65,7 +80,7 @@ class Scorer {
   }
 
   List<Tile> _removePairFromHand(String pairTile) {
-    List<Tile> tempList = new List.from(raw.tiles);
+    List<Tile> tempList = new List.from(raw.closedPortion);
     int i = tempList.indexWhere((tile) => tile.toString() == pairTile.toString());
     tempList.removeRange(i, i+2);
     return tempList;
@@ -100,6 +115,7 @@ class Scorer {
       Meld newMeld = Meld(combo);
       if (newMeld.type != meldType.INVALID) possibleMelds.add(newMeld);
     }
+    if (possibleMelds.length == 0 ) return [];
 
     List<List<dynamic>> validComp = [];
 
@@ -142,8 +158,12 @@ class Scorer {
       List<dynamic> root = allMelds[j];
       int meldCount = root.length;
       List<dynamic> currentMelds = root;
+      if (meldCount == closedMelds) {
+        possibleHands.add(currentMelds);
+        continue;
+      }
       for (int i = 1; i < allMelds.length; i++) {
-        //print("$root <-> ${allMelds[i]}");
+        print("$root <-> ${allMelds[i]}");
         int newCount = meldCount + allMelds[i].length;
         if (newCount > closedMelds) continue;
         currentMelds.addAll(allMelds[i]);
