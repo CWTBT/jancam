@@ -128,6 +128,8 @@ class Scorer {
 
   List<List<dynamic>> combineMelds(List<List<dynamic>> allMelds) {
     List<List<dynamic>> possibleHands = new List();
+    // Subtracting the two pair tiles, this is the number of melds we need
+    double closedMelds = (raw.closedPortion.length - 2) / 3;
 
     if (allMelds.length == 1) {
       possibleHands.add(allMelds[0]);
@@ -143,9 +145,9 @@ class Scorer {
       for (int i = 1; i < allMelds.length; i++) {
         //print("$root <-> ${allMelds[i]}");
         int newCount = meldCount + allMelds[i].length;
-        if (newCount > 4) continue;
+        if (newCount > closedMelds) continue;
         currentMelds.addAll(allMelds[i]);
-        if (newCount == 4) {
+        if (newCount == closedMelds) {
           possibleHands.add(currentMelds);
           currentMelds = root;
           meldCount = root.length;
