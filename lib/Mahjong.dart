@@ -123,10 +123,10 @@ class Hand {
     String s = "[";
     bool opened = false;
     for (Meld m in melds) {
-      if(m.isOpen && !opened) s = s.substring(0, s.length - 2) +  "|";
+      if(m.isOpen && !opened) s = s.substring(0, s.length) + pair.toString() + "|";
       s += m.toString() +", ";
     }
-    return s.substring(0, s.length-2) + "]";
+    return s.substring(0, s.length - 2) + "]";
   }
 }
 

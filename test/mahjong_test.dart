@@ -74,40 +74,37 @@ void main() {
     expect(s.getValidCompositions(manzu.tiles).toString(), equals(expected.toString()));
   });
 
+  RawTiles fullHand = new RawTiles.fromString("223344m11p234m567s");
+  Scorer s = new Scorer(fullHand, fullHand.tiles[0]);
+  Meld souzu = new Meld([Tile(5, "s"), Tile(6, "s"), Tile(7, "s")]);
+  Meld pair = new Meld([Tile(1, "p"), Tile(1, "p")]);
+  Meld manzu_seq = new Meld([Tile(2, "m"), Tile(3, "m"), Tile(4, "m")]);
+
+  List<Meld> manzu_tri = [];
+  for (int i = 2; i < 5; i++) {
+    manzu_tri.add(new Meld([Tile(i, "m"), Tile(i, "m"), Tile(i, "m")]));
+  }
+  manzu_tri.add(souzu);
+
   test("Melds combined properly, compositions for closed hand", () {
-    RawTiles fullHand = new RawTiles.fromString("223344m11p234m567s");
-    Scorer s = new Scorer(fullHand, fullHand.tiles[0]);
-    Meld souzu = new Meld([Tile(5, "s"), Tile(6, "s"), Tile(7, "s")]);
-    Meld pair = new Meld([Tile(1, "p"), Tile(1, "p")]);
-    Meld manzu_seq = new Meld([Tile(2, "m"), Tile(3, "m"), Tile(4, "m")]);
-
-    List<Meld> manzu_tri = [];
-    for (int i = 2; i < 5; i++) {
-      manzu_tri.add(new Meld([Tile(i, "m"), Tile(i, "m"), Tile(i, "m")]));
-    }
-    manzu_tri.add(souzu);
-
     Hand hand1 = Hand([manzu_seq, manzu_seq, manzu_seq, souzu], pair, fullHand.tiles[0]);
     Hand hand2 = Hand(manzu_tri, pair, fullHand.tiles[0]);
     expect(s.getValidHands().toString(), equals([hand2, hand1].toString()));
   });
 
+  RawTiles fullOpenHand = new RawTiles.fromString("223344m11p234m|567s");
+  Meld openSouzu = new Meld([Tile(5, "s", true), Tile(6, "s", true), Tile(7, "s", true)]);
+
+  List<Meld> manzu_triOpen = [];
+  for (int i = 2; i < 5; i++) {
+    manzu_triOpen.add(new Meld([Tile(i, "m"), Tile(i, "m"), Tile(i, "m")]));
+  }
+  manzu_triOpen.add(openSouzu);
+
   test("Melds combined properly, compositions for open hand", () {
-    RawTiles fullHand = new RawTiles.fromString("223344m11p234m|567s");
-    Scorer s = new Scorer(fullHand, fullHand.tiles[0]);
-    // Open souzu sequence
-    Meld souzu = new Meld([Tile(5, "s", true), Tile(6, "s", true), Tile(7, "s", true)]);
-    Meld pair = new Meld([Tile(1, "p"), Tile(1, "p")]);
-    Meld manzu_seq = new Meld([Tile(2, "m"), Tile(3, "m"), Tile(4, "m")]);
-
-    List<Meld> manzu_tri = [];
-    for (int i = 2; i < 5; i++) {
-      manzu_tri.add(new Meld([Tile(i, "m"), Tile(i, "m"), Tile(i, "m")]));
-    }
-    manzu_tri.add(souzu);
-
-    Hand hand1 = Hand([manzu_seq, manzu_seq, manzu_seq, souzu], pair, fullHand.tiles[0]);
-    Hand hand2 = Hand(manzu_tri, pair, fullHand.tiles[0]);
+    Scorer s = new Scorer(fullOpenHand, fullOpenHand.tiles[0]);
+    Hand hand1 = Hand([manzu_seq, manzu_seq, manzu_seq, openSouzu], pair, fullHand.tiles[0]);
+    Hand hand2 = Hand(manzu_triOpen, pair, fullHand.tiles[0]);
     expect(s.getValidHands().toString(), equals([hand2, hand1].toString()));
   });
 }
