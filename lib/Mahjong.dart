@@ -106,12 +106,14 @@ class Hand {
   final List<dynamic> melds;
   final Meld pair;
   final Tile winningTile;
+  bool isOpen = false;
 
   Hand(this.melds, this.pair, this.winningTile);
 
   List<Tile> toTiles() {
     List<Tile> tiles = [];
     for (Meld m in melds) {
+      if (m.isOpen && !isOpen) isOpen = true;
       for (Tile t in m.meldedTiles) {
         tiles.add(t);
       }
@@ -126,7 +128,8 @@ class Hand {
       if(m.isOpen && !opened) s = s.substring(0, s.length) + pair.toString() + "|";
       s += m.toString() +", ";
     }
-    return s.substring(0, s.length - 2) + "]";
+    if (opened) return s.substring(0, s.length - 2) + "]";
+    else return s.substring(0, s.length) + pair.toString() + "]";
   }
 }
 

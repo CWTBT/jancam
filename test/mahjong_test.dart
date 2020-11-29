@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jancam/Mahjong.dart';
 import 'package:jancam/Scorer.dart';
+import 'package:jancam/Yaku.dart';
 
 void main() {
   RawTiles closed = new RawTiles.fromString("234m11234p234s111z");
@@ -106,5 +107,16 @@ void main() {
     Hand hand1 = Hand([manzu_seq, manzu_seq, manzu_seq, openSouzu], pair, fullHand.tiles[0]);
     Hand hand2 = Hand(manzu_triOpen, pair, fullHand.tiles[0]);
     expect(s.getValidHands().toString(), equals([hand2, hand1].toString()));
+  });
+
+  test("Tanyao and Mixed Sequences han scored properly", () {
+    RawTiles simpleSequences = RawTiles.fromString("345s345m345p88m777p");
+    Scorer s = new Scorer(simpleSequences, fullOpenHand.tiles[0]);
+    List<Hand> hands = s.getValidHands();
+    Yaku yaku = new Yaku(hands[0], "East", "East");
+    yaku.calculateHan();
+    print(hands[0]);
+    print("HAN: ${yaku.han}");
+    print("YAKU: ${yaku.satisfiedYaku}");
   });
 }

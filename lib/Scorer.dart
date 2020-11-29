@@ -36,7 +36,6 @@ class Scorer {
         }
       }
     });
-    print(validHands);
     return validHands;
   }
 
@@ -163,7 +162,6 @@ class Scorer {
         continue;
       }
       for (int i = 1; i < allMelds.length; i++) {
-        print("$root <-> ${allMelds[i]}");
         int newCount = meldCount + allMelds[i].length;
         if (newCount > closedMelds) continue;
         currentMelds.addAll(allMelds[i]);
