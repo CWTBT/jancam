@@ -29,20 +29,24 @@ class RecognitionDisplayState extends State<RecognitionDisplay> {
 
   @override
   Widget build(BuildContext context) {
-    Size screen = MediaQuery.of(context).size;
-    return Scaffold (
-        body: Stack (
-          children: [
-            CameraManager(widget.camera, setRecognitions),
-            BoundingBox(
-              _recognitions == null ? [] : _recognitions,
-              math.max(_imageHeight, _imageWidth),
-              math.min(_imageHeight, _imageWidth),
-              screen.height,
-              screen.width,
-            ),
-          ]
-        ),
+    return OrientationBuilder (
+      builder: (context, orientation) {
+        Size screen = MediaQuery.of(context).size;
+        return Scaffold (
+          body: Stack (
+              children: [
+                CameraManager(widget.camera, setRecognitions),
+                BoundingBox(
+                  _recognitions == null ? [] : _recognitions,
+                  math.max(_imageHeight, _imageWidth),
+                  math.min(_imageHeight, _imageWidth),
+                  screen.height,
+                  screen.width,
+                ),
+              ]
+          ),
+        );
+      }
     );
   }
 }

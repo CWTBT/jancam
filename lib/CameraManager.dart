@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:tflite/tflite.dart';
+import 'package:flutter/services.dart';
 
 // Callback for _setRecognitions in RecognitionDisplay
 typedef void Callback(List<dynamic> list, int h, int w);
@@ -37,8 +38,6 @@ class CameraManagerState extends State<CameraManager>{
 
     loadDetectionModel();
 
-    // This is from the example code and I still need to figure out
-    // what it does.
     _initializeControllerFuture = _controller.initialize().then((_) {
       if (!mounted) {
         return;
@@ -61,6 +60,7 @@ class CameraManagerState extends State<CameraManager>{
 
   @override
   Widget build(BuildContext context) {
+    //SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
     return _getCameraPreview();
   }
 
@@ -69,11 +69,22 @@ class CameraManagerState extends State<CameraManager>{
       future: _initializeControllerFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return CameraPreview(_controller);
+          return buildRotatedPreview();
         } else {
           return Center(child: CircularProgressIndicator());
         }
       },
+    );
+  }
+
+  Widget buildRotatedPreview() {
+    return OrientationBuilder (
+      builder: (context, orientation) {
+        return RotatedBox(
+          quarterTurns: orientation == Orientation.portrait ? 0 : 3,
+          child: CameraPreview(_controller),
+        );
+      }
     );
   }
 
