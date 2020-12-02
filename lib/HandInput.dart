@@ -12,6 +12,7 @@ class HandInput extends StatefulWidget{
 
 class HandInputState extends State<HandInput> {
   List<String> tileStrings = [];
+  List<String> openTileStrings = [];
   List<Widget> closedTileWidgets = [];
   List<Widget> openTileWidgets = [];
   var _tapPosition;
@@ -30,6 +31,11 @@ class HandInputState extends State<HandInput> {
               height: 100,
               child: buildHandDisplay(),
             ),
+            Divider(),
+            SizedBox(
+              height: 100,
+              child: buildOpenHandDisplay(),
+            )
             //buildHandDisplay(),
           ]
         ),
@@ -54,6 +60,12 @@ class HandInputState extends State<HandInput> {
     );
   }
 
+  Widget buildOpenHandDisplay() {
+    return Wrap(
+        children: openTileWidgets
+    );
+  }
+
   List<Widget> buildTiles(){
     List<String> filenames = _buildFilenameList();
     List<Widget> imageList = [];
@@ -70,17 +82,12 @@ class HandInputState extends State<HandInput> {
     String strippedName = name.substring(0, name.length-4);
     return GestureDetector (
       behavior: HitTestBehavior.translucent,
-      child: Stack (
-          children: [
-            Image(image: AssetImage("assets/Tiles/Front.png")),
-            Image(image: AssetImage("assets/Tiles/$name"))
-          ]
-      ),
+      child: renderTile(name),
       onTapDown: _storePosition,
       onTap: () {
         setState(() {
           tileStrings.add(strippedName);
-          displayTile(false, name);
+          displayTile("closed", name);
         });
       },
       onLongPress: () {
@@ -89,19 +96,14 @@ class HandInputState extends State<HandInput> {
     );
   }
 
-  void displayTile(bool isOpened, String name) {
+  void displayTile(String meldType, String name) {
     String strippedName = name.substring(0, name.length-4);
-    if (!isOpened) {
+    if (meldType == "closed") {
       Widget tileButton = GestureDetector (
         behavior: HitTestBehavior.translucent,
         child: SizedBox(
           height: 50,
-          child:Stack (
-              children: [
-                Image(image: AssetImage("assets/Tiles/Front.png")),
-                Image(image: AssetImage("assets/Tiles/$name"))
-              ]
-          ),
+          child: renderTile(name),
         ),
         onTap: () {
           setState(() {
@@ -112,10 +114,61 @@ class HandInputState extends State<HandInput> {
       );
       closedTileWidgets.add(tileButton);
     }
+    else {
+      List<Widget> imageList;
+      if (meldType == "chi") imageList = renderChi(name);
+      else if (meldType == "pon") imageList = renderPon(name);
+      else if (meldType == "kan") {
+        imageList = renderPon(name);
+        imageList.add(renderTile(name));
+      }
+      Widget tileButton = GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        child: SizedBox(
+          height: 50,
+          child: Row(
+            children: imageList
+          ),
+        ),
+        onTap: () {
+          setState(() {
+            openTileWidgets.removeAt(openTileStrings.indexOf(strippedName));
+            openTileStrings.remove(strippedName);
+          });
+        }
+      );
+      openTileWidgets.add(tileButton);
+    }
+  }
+
+  List<Widget> renderChi(String name) {
+    String tileSuit = name.substring(0, name.length-5);
+    int tileRank = int.parse(name.substring(name.length-5, name.length-4));
+    List<Widget> tileImages = [
+      for(int i = 0; i < 3; i++) renderTile(tileSuit+(tileRank+i).toString()+".png")
+    ];
+    return tileImages;
+  }
+
+  List<Widget> renderPon(String name) {
+    List<Widget> tileImages = [
+      for(int i = 0; i < 3; i++) renderTile(name)
+    ];
+    return tileImages;
+  }
+
+  Widget renderTile(String name) {
+    return Stack(
+      children: [
+        Image(image: AssetImage("assets/Tiles/Front.png")),
+        Image(image: AssetImage("assets/Tiles/$name"))
+      ]
+    );
   }
 
   //https://stackoverflow.com/questions/54300081/flutter-popupmenu-on-long-press/54714628#54714628
   void _showCustomMenu(BuildContext context, String name) {
+    String strippedName = name.substring(0, name.length-4);
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
     showMenu(
         context: context,
@@ -128,9 +181,25 @@ class HandInputState extends State<HandInput> {
       // delta would be null if user taps on outside the popup menu
       // (causing it to close without making selection)
       if (delta == null) return;
-      setState(() {
-        print(delta);
-      });
+      print(delta);
+      if (delta == 0) {
+        setState(() {
+          openTileStrings.add(strippedName);
+          displayTile("pon", name);
+        });
+      }
+      else if (delta == 1) {
+        setState(() {
+          openTileStrings.add(strippedName);
+          displayTile("chi", name);
+        });
+      }
+      if (delta == 2) {
+        setState(() {
+          openTileStrings.add(strippedName);
+          displayTile("kan", name);
+        });
+      }
     });
   }
 
