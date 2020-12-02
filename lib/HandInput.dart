@@ -11,7 +11,9 @@ class HandInput extends StatefulWidget{
 }
 
 class HandInputState extends State<HandInput> {
-  List<Tile> tiles = [];
+  List<String> tileStrings = [];
+  List<Widget> closedTileWidgets = [];
+  List<Widget> openTileWidgets = [];
   var _tapPosition;
 
   @override
@@ -23,6 +25,10 @@ class HandInputState extends State<HandInput> {
             SizedBox(
               height: 275,
               child: buildGrid()
+            ),
+            SizedBox(
+              height: 100,
+              child: buildHandDisplay(),
             ),
             //buildHandDisplay(),
           ]
@@ -43,8 +49,8 @@ class HandInputState extends State<HandInput> {
   }
 
   Widget buildHandDisplay() {
-    return ListView(
-      children: []
+    return Wrap(
+      children: closedTileWidgets
     );
   }
 
@@ -72,19 +78,44 @@ class HandInputState extends State<HandInput> {
       ),
       onTapDown: _storePosition,
       onTap: () {
-        print(strippedName);
         setState(() {
-          //tiles.add(TileMap[strippedName]);
+          tileStrings.add(strippedName);
+          displayTile(false, name);
         });
       },
       onLongPress: () {
-        _showCustomMenu(context);
+        _showCustomMenu(context, name);
       },
     );
   }
 
+  void displayTile(bool isOpened, String name) {
+    String strippedName = name.substring(0, name.length-4);
+    if (!isOpened) {
+      Widget tileButton = GestureDetector (
+        behavior: HitTestBehavior.translucent,
+        child: SizedBox(
+          height: 50,
+          child:Stack (
+              children: [
+                Image(image: AssetImage("assets/Tiles/Front.png")),
+                Image(image: AssetImage("assets/Tiles/$name"))
+              ]
+          ),
+        ),
+        onTap: () {
+          setState(() {
+            closedTileWidgets.removeAt(tileStrings.indexOf(strippedName));
+            tileStrings.remove(strippedName);
+          });
+        }
+      );
+      closedTileWidgets.add(tileButton);
+    }
+  }
+
   //https://stackoverflow.com/questions/54300081/flutter-popupmenu-on-long-press/54714628#54714628
-  void _showCustomMenu(BuildContext context) {
+  void _showCustomMenu(BuildContext context, String name) {
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
     showMenu(
         context: context,
