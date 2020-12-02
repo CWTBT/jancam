@@ -139,6 +139,16 @@ class HandInputState extends State<HandInput> {
       );
       openTileWidgets.add(tileButton);
     }
+    if (tileStrings.length + (openTileStrings.length * 3) == 14) {
+      completeHand();
+    }
+  }
+
+  void completeHand() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => HandInput()),
+    );
   }
 
   List<Widget> renderChi(String name) {
@@ -182,6 +192,7 @@ class HandInputState extends State<HandInput> {
       // delta would be null if user taps on outside the popup menu
       // (causing it to close without making selection)
       if (delta == null) return;
+      if (tileStrings.length + (openTileStrings.length * 3) + 3 > 14) return;
       print(delta);
       if (delta == 0) {
         setState(() {
