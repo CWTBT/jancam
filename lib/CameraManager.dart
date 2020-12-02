@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:tflite/tflite.dart';
-import 'package:flutter/services.dart';
 
 // Callback for _setRecognitions in RecognitionDisplay
 typedef void Callback(List<dynamic> list, int h, int w);
@@ -24,7 +23,7 @@ class CameraManagerState extends State<CameraManager>{
   Future<void> loadDetectionModel() async {
     await Tflite.loadModel(
         model: "assets/tflite/ssd_mobilenet.tflite",
-        labels: "assets/tflite/ssd_mobilenet.txt"
+        labels: "assets/tflite/ssd_mobilenet.txt",
     );
   }
 
@@ -77,14 +76,33 @@ class CameraManagerState extends State<CameraManager>{
     );
   }
 
+  //https://stackoverflow.com/questions/62299947/consistent-camera-preview-rotation-behavior-on-phones-and-tablets-in-flutter
+  //https://stackoverflow.com/questions/51284589/flutter-how-to-know-the-device-is-deviceorientation-is-up-or-down
   Widget buildRotatedPreview() {
     return OrientationBuilder (
       builder: (context, orientation) {
         return RotatedBox(
           quarterTurns: orientation == Orientation.portrait ? 0 : 3,
+          //child: sizedCameraPreview(orientation),
           child: CameraPreview(_controller),
         );
       }
+    );
+  }
+
+  Widget sizedCameraPreview(Orientation orientation) {
+    final size = MediaQuery.of(context).size;
+    var deviceRatio;
+    if (orientation == Orientation.landscape) deviceRatio = size.height / size.width;
+    else deviceRatio = size.width / size.height;
+    return Transform.scale(
+      scale: _controller.value.aspectRatio / deviceRatio,
+      child: Center(
+        child: AspectRatio(
+          aspectRatio: _controller.value.aspectRatio,
+          child: CameraPreview(_controller)
+        ),
+      ),
     );
   }
 
@@ -100,6 +118,7 @@ class CameraManagerState extends State<CameraManager>{
       imageHeight: img.height,
       imageWidth: img.width,
       numResultsPerClass: 1,
+      rotation: 90,
 
     ).then((recognitions) {
       widget.setRecognitions(recognitions, img.height, img.width);

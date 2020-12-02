@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'MahjongMenu.dart';
 import 'RecognitionDisplay.dart';
 
 void main() async {
@@ -10,7 +11,7 @@ void main() async {
   runApp(
       MaterialApp(
         theme: ThemeData.dark(),
-        home: RecognitionDisplay(firstCamera),
+        home: MahjongMenu(),
       ),
   );
 }

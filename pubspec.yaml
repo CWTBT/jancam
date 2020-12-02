@@ -51,6 +51,9 @@ flutter:
   assets:
     - assets/tflite/ssd_mobilenet.tflite
     - assets/tflite/ssd_mobilenet.txt
+    - assets/tflite/model.tflite
+    - assets/tflite/labels.txt
+    - assets/Tiles/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
