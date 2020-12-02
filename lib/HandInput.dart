@@ -33,7 +33,7 @@ class HandInputState extends State<HandInput> {
             ),
             Divider(),
             SizedBox(
-              height: 100,
+              height: 200,
               child: buildOpenHandDisplay(),
             )
             //buildHandDisplay(),
@@ -168,6 +168,7 @@ class HandInputState extends State<HandInput> {
 
   //https://stackoverflow.com/questions/54300081/flutter-popupmenu-on-long-press/54714628#54714628
   void _showCustomMenu(BuildContext context, String name) {
+    List<String> noChi = ["Ton", "Nan", "Pei", "Shaa", "Haku", "Hatsu", "Chun"];
     String strippedName = name.substring(0, name.length-4);
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
     showMenu(
@@ -189,6 +190,8 @@ class HandInputState extends State<HandInput> {
         });
       }
       else if (delta == 1) {
+        if (noChi.contains(strippedName)) return;
+        else if (int.parse(name.substring(name.length-5, name.length-4)) > 7) return;
         setState(() {
           openTileStrings.add(strippedName);
           displayTile("chi", name);
