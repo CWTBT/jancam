@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'TileMap.dart';
 import 'Mahjong.dart';
+import 'Entries.dart';
 
 class HandInput extends StatefulWidget{
   HandInput();
@@ -76,7 +77,9 @@ class HandInputState extends State<HandInput> {
           //tiles.add(TileMap[strippedName]);
         });
       },
-      onLongPress: () => _showCustomMenu(context),
+      onLongPress: () {
+        _showCustomMenu(context);
+      },
     );
   }
 
@@ -84,18 +87,20 @@ class HandInputState extends State<HandInput> {
   void _showCustomMenu(BuildContext context) {
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
     showMenu(
+        context: context,
+        items: <PopupMenuEntry<int>>[MeldEntry()],
         position: RelativeRect.fromRect(
             _tapPosition & const Size(40, 40), // smaller rect, the touch area
-            Offset.zero & overlay.semanticBounds.size   // Bigger rect, the entire screen
+            Offset.zero & overlay.size   // Bigger rect, the entire screen
         ),
-        context: context,
-        items: <PopupMenuEntry>[
-          PopupMenuItem(
-            value: 1,
-            child: Text("Ooga Booga"),
-          )
-        ]
-    );
+    ).then<void>((int delta) {
+      // delta would be null if user taps on outside the popup menu
+      // (causing it to close without making selection)
+      if (delta == null) return;
+      setState(() {
+        print(delta);
+      });
+    });
   }
 
   void _storePosition(TapDownDetails details) {
