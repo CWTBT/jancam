@@ -11,7 +11,7 @@ void main() async {
   runApp(
       MaterialApp(
         theme: ThemeData.dark(),
-        home: MahjongMenu(),
+        home: RecognitionDisplay(firstCamera),
       ),
   );
 }

@@ -113,7 +113,7 @@ void main() {
     RawTiles simpleSequences = RawTiles.fromString("345s345m345p88m777p");
     Scorer s = new Scorer(simpleSequences, fullOpenHand.tiles[0]);
     List<Hand> hands = s.getValidHands();
-    Yaku yaku = new Yaku(hands[0], "East", "East");
+    Yaku yaku = new Yaku(hands[0], "East", "East", true);
     yaku.calculateHan();
     print(hands[0]);
     print("HAN: ${yaku.han}");

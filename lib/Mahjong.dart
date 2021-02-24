@@ -129,8 +129,20 @@ class Hand {
       s += m.toString() +", ";
     }
     if (opened) return s.substring(0, s.length - 2) + "]";
-    else return s.substring(0, s.length) + pair.toString() + "]";
+    else return s.substring(0, s.length)+ "]";
   }
+}
+
+class ScoredHand {
+  List<Tile> tiles;
+  int han;
+  int fu;
+  String score;
+
+  ScoredHand(this.tiles, this.han, this.fu, this.score) {
+
+  }
+
 }
 
 class Meld {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'TileMap.dart';
 import 'Mahjong.dart';
 import 'Entries.dart';
+import 'HandModification.dart';
 
 class HandInput extends StatefulWidget{
   HandInput();
@@ -13,13 +14,18 @@ class HandInput extends StatefulWidget{
 class HandInputState extends State<HandInput> {
   List<String> tileStrings = [];
   List<String> openTileStrings = [];
+  List<String> openMeldTypes = [];
   List<Widget> closedTileWidgets = [];
   List<Widget> openTileWidgets = [];
+
   var _tapPosition;
 
   @override
   Widget build(BuildContext context){
     return Scaffold(
+      appBar: AppBar(
+          title: Text("JanCam")
+      ),
       body: Center(
         child: Column (
           children: [
@@ -133,6 +139,7 @@ class HandInputState extends State<HandInput> {
         onTap: () {
           setState(() {
             openTileWidgets.removeAt(openTileStrings.indexOf(strippedName));
+            openMeldTypes.removeAt(openTileStrings.indexOf(strippedName));
             openTileStrings.remove(strippedName);
           });
         }
@@ -145,9 +152,33 @@ class HandInputState extends State<HandInput> {
   }
 
   void completeHand() {
+    List<Tile> tiles = [];
+    for (String tileName in tileStrings) {
+      print(tileName);
+      tiles.add(stringToTile(tileName, false));
+    }
+    for (int i = 0; i < openTileStrings.length; i++) {
+      String tileName = openTileStrings[i];
+      if (openMeldTypes[i] == "pon") {
+        for (int j = 0; j < 3; j++) tiles.add(stringToTile(tileName, true));
+      }
+      else if (openMeldTypes[i] == "chi") {
+        String tileSuit = tileName.substring(0, tileName.length-1);
+        int tileRank = int.parse(tileName.substring(tileName.length-1, tileName.length));
+        for (int j = 0; j < 3; j++) {
+          String newTile = tileSuit+(tileRank+j).toString();
+          tiles.add(stringToTile(newTile, true));
+        }
+      }
+      else if (openMeldTypes[i] == "kan") {
+        for (int j = 0; j < 4; j++) tiles.add(stringToTile(tileName, true));
+      }
+    }
+
+    RawTiles possible_hand = new RawTiles(tiles);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => HandInput()),
+      MaterialPageRoute(builder: (context) => HandModification(possible_hand, tiles.last)),
     );
   }
 
@@ -176,6 +207,23 @@ class HandInputState extends State<HandInput> {
     );
   }
 
+  Tile stringToTile(String strippedName, bool isOpen) {
+
+    Map<String, int> honorsMap = {
+      "Ton": 1,
+      "Nan": 2,
+      "Shaa": 3,
+      "Pei": 4,
+      "Hatsu": 5,
+      "Chun": 6,
+      "Haku": 7
+    };
+    if (honorsMap.containsKey(strippedName)) return new Tile(honorsMap[strippedName], "z", isOpen);
+    String tileSuit = strippedName.substring(0, 1).toLowerCase();
+    int tileRank = int.parse(strippedName.substring(strippedName.length-1, strippedName.length));
+    return new Tile(tileRank, tileSuit, isOpen);
+  }
+
   //https://stackoverflow.com/questions/54300081/flutter-popupmenu-on-long-press/54714628#54714628
   void _showCustomMenu(BuildContext context, String name) {
     List<String> noChi = ["Ton", "Nan", "Pei", "Shaa", "Haku", "Hatsu", "Chun"];
@@ -197,6 +245,7 @@ class HandInputState extends State<HandInput> {
       if (delta == 0) {
         setState(() {
           openTileStrings.add(strippedName);
+          openMeldTypes.add("pon");
           displayTile("pon", name);
         });
       }
@@ -205,12 +254,14 @@ class HandInputState extends State<HandInput> {
         else if (int.parse(name.substring(name.length-5, name.length-4)) > 7) return;
         setState(() {
           openTileStrings.add(strippedName);
+          openMeldTypes.add("chi");
           displayTile("chi", name);
         });
       }
       if (delta == 2) {
         setState(() {
           openTileStrings.add(strippedName);
+          openMeldTypes.add("kan");
           displayTile("kan", name);
         });
       }

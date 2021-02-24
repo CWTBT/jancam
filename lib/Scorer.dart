@@ -1,6 +1,8 @@
 import 'Mahjong.dart';
 import 'package:trotter/trotter.dart';
 import 'meldType.dart';
+import 'Yaku.dart';
+import 'dart:math';
 
 class Scorer {
 
@@ -8,6 +10,67 @@ class Scorer {
   final Tile winningTile;
 
   Scorer(this.raw, this.winningTile);
+
+  ScoredHand score(List<dynamic> hands, String player, String round, bool tsumoWin) {
+    int bestHan = 0;
+    int bestFu = 0;
+    Hand bestHand;
+    String score = "0";
+    for (Hand h in hands) {
+      Yaku yakuManager = Yaku(h, player, round, tsumoWin);
+      yakuManager.calculateHan();
+      yakuManager.calculateFu();
+      if (yakuManager.han > bestHan) {
+        bestHan = yakuManager.han;
+        bestFu = yakuManager.fu;
+        bestHand = h;
+      }
+    }
+
+    if (bestHan > 4) {
+      int base = 0;
+      if (bestHan == 5) base = 4000;
+      else if (bestHan < 8) base = 6000;
+      else if (bestHan < 12) base = 8000;
+      else if (bestHan < 13) base = 12000;
+      else base = 16000;
+
+      //is dealer
+      if (player == "east") {
+        if (tsumoWin) {
+          score = (upToNearestHundred(base * 3)).toString();
+        }
+        else score = upToNearestHundred(base).toString() + " from All";
+      }
+      else {
+        if (!tsumoWin) score = (upToNearestHundred(base * 2)).toString();
+        else score = (upToNearestHundred((base/2).toInt())).toString() + "/" + upToNearestHundred(base).toString();
+      }
+    }
+
+    else {
+      int base = bestFu * (pow(2, (2+bestHan)));
+      //is dealer
+      if (player == "east") {
+        if (!tsumoWin) score = (upToNearestHundred(base*6)).toString();
+        else score = (upToNearestHundred(base*2)).toString() + " from All";
+      }
+      else {
+        if (!tsumoWin) score = (upToNearestHundred(base*4)).toString();
+        else score = upToNearestHundred(base).toString() + "/" + (upToNearestHundred(base*2)).toString();
+      }
+    }
+
+    List<Tile> tileList = bestHand.toTiles();
+    List<Tile> pairTiles = [for(Tile t in bestHand.pair.meldedTiles) t];
+    tileList.addAll(pairTiles);
+    return ScoredHand(tileList, bestHan, bestFu, score);
+  }
+
+  int upToNearestHundred(int num) {
+    num % 100 > 0 ? num += (100 - (num % 100)): num += 0;
+    return num;
+  }
 
   List<Hand> getValidHands() {
     List<String> possiblePairTiles = getPossiblePairTiles();
